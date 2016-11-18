@@ -157,39 +157,13 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>相信大家接触Alamofire并开始做swift的网络编程时，都会搜到<a href="http://www.cocoachina.com/ios/20141202/10390.html" target="_blank" rel="external">http://www.cocoachina.com/ios/20141202/10390.html</a> </p>
+        <p>相信大家接触Alamofire并开始做swift的网络编程时，都会搜到<a href="http://www.cocoachina.com/ios/20141202/10390.html">http://www.cocoachina.com/ios/20141202/10390.html</a> </p>
 <p>这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。</p>
-<p>Alamofire.request(.GET, “<a href="https://api.500px.com/v1/photos&quot;).responseJSON(" target="_blank" rel="external">https://api.500px.com/v1/photos&quot;).responseJSON(</a>) {<br>  (<em>, </em>, data, _) in<br>  println(data)<br>}<br>这是一个简单但是很常用的请求，以GET的方式，向这个网页发送请求，然后在返回的闭包中处理返回（在新版的Alamofire中，已不再是(request, response, data, error)的返回格式）。</p>
-<p>显然,request() 是Alamofire.swift中提供的方法，于是我们点进Alamofire.swift，看看这个类做了哪些事情：</p>
-<p>首先，它给出了两个协议，URLStringConvertible和URLRequestConvertible。分别要求给出一个String和一个URLRequest。这是一种典型的面向协议思想，在上面的例子中，这个url并不是直接以String类型传入的，而是作为一个URLStringConvertible协议的URLString属性传入的。这样，只要是实现了URLStringConvertible协议的对象，都可以将其URLString属性作为参数传进request方法。</p>
-<p>然后是一个MARK为Convenience的方法URLRequest，这个方法并没有暴露出去，而是提供给Manager类，以供创建一个基础的NSMutableRequest。</p>
-<p>之后就全是暴露出去的public func了，像request，upload什么的，用户可以直接调用。注意到每一个方法都有两种实现，分别是用户挨个传參和直接传入一个URLRequest。</p>
-<p>这样Alamofire.swift就梳理完了，可以以一个request方法为例，看看它到底做了什么了。只有一行：</p>
-<p>return Manager.sharedInstance.request(URLRequest.URLRequest)<br>于是我们进入Manager.swift类：</p>
-<p>在这个类中，我们最先关注的肯定是sharedInstance这个东西，果然，在类的开头，我们发现sharedInstance是Manager类的一个实例，作者配置了一下它的默认SessionConfiguration以及默认HTTP请求头，接着实例化它。在这个过程中，又陆续设置好了session（iOS自带的NSURLSession），delegate（SessionDelegate类，在Mangager类中定义），serverTrustPolicyManager（在ServerTrustPolicy.swift中，作用是创建了一个[String: ServerTrustPolicy]数组，为不同host设置证书），还有一个backgroundCompletionHandler闭包，这个闭包被设置后，会配合UIApplicationDelegate中的’application:handleEventsForBackgroundURLSession:completionHandler’工作，当应用在后台完成请求任务时触发。</p>
-<p>Manager类的铺垫就是上面这些，仔细一看，发现除了delegate，其他都基本设置好了，于是我们再往下翻翻，看到了一个内部类SessionDelegate，它即将给出delegate的实现。先看看它的前几行，给出一个[Int: Request.TaskDelegate]数组，又创建了一个线程。这俩先放着，先看一下subscript那块儿，为SessionDelegate类设置下标，这样，我们就可以通过delegate[task]的形式来get和set类中的东西了。这里的get和set都很注重细节，为什么取值时要在一个单独的线程中操作呢？我们可以先看看dispatch_sync的方法描述：Submits a block object for execution on a dispatch queue and waits until that block completes。Manager类的实例sharedInstance显然只有一个，由它的subdelegates管理单个任务，所以这里是为了防止多个任务同时要求取值时发生混乱吗。。set方法用了dispatch_barrier_async，barrier这个属性会让线程隔断开来，这个线程只有在它之前的线程全部结束之后才开始工作，它后面的线程也会在它结束之后才开始，这样是为了更安全得设置值吧。</p>
-<p>读到这里时，可能会比较迷茫，不理解SessionDelegate存在的意义是什么，没关系，可以往回走一步，看看request方法中还有哪些细节可以读读：这个方法的实现刚开始看会觉得很抽象，我们不妨看看它的返回值，一个Request对象。于是鼠标点进Request.swift类。</p>
-<p>通读完整个库后，会发现Manager类只是负责总管，而Request类才是实实在在的请求对象，那么，在Request.swift中，都有哪些东西呢？它遵循了大部分class的写法，首先给出类中成员变量：delegate(TaskDelegate), task(NSURLSessionTask), request(NSURLRequest), response(NSHTTPURLResponse), progress(NSProgress)，然后是init方法，第一个参数session就是这个任务的NSURLSession，第二个参数task会根据类型来设置任务的delegate。再往下看看，MARK: -Authentication和MARK: -State都比较好理解，分别提供认证和状态管理；MARK: -Progress则是设置任务处理过程中的闭包，可以先不急着看懂。</p>
-<p>再往下，就是这个Request类，也是整个库的核心TaskDelegate类了。在它的初始化方法中，创建了一个最大同时执行数为1的操作队列，然后先将其挂起。之后重写了四个闭包，然后分别给了实现。如果对Manager类有些印象的话，不难发现，Manager类中的NSURLSessionTaskDelegate是给出了完全相同的一套闭包和方法的，这时难免陷入疑惑，在一个网路请求过程中，触发的到底是哪个类的方法呢？我的第一思路是分别给这两个类中的didCompleteWithError方法补上一句Print(“didCompleteWithError in Manager/Request”)，这样就可以看出执行情况了。于是我创建了一个默认的网路请求，然后在控制台看到了这样的输出：</p>
-<p>didCompleteWithError in Request<br>didCompleteWithError in Manager<br>从结果上看，好像是先执行了Request类中的代理方法。不过，真的是这样吗？我给Request类中的这个代理方法打了断点，打算从Xcode给出的执行顺序上再检查一次：</p>
-<p>然而从线程上看，首先执行的其实是Manager.SessionDelegate.URLSession(…)，其次才是Request.TaskDelegate.URLSession(…)。于是点进Manager类中的这个方法，看看它的实现逻辑：先检查自己类中的taskDidComplete闭包有没有给出实现，有的话直接调用这个闭包；如果没有的话，通过self[task]这种之前定义了的下标方式得到这个task的TaskDelegate，然后就进入了Request类，调用Request类中的同名函数，也是先检查taskDidCompleteWithError有没有给出实现，如果还没有的话，就queue.suspended = false,即开始执行delegate所持有的操作队列，调用结束后，回到Manager类，self[task] = nil,彻底结束掉这个任务。</p>
-<p>占掉了Manager类和Request类大部分篇幅的这些override closures 和delegate methods其实都是这么个逻辑，总结起来就是：Manager类是Alamofire库的总管，持有所有的网络请求，用户可以给同类的session设置相同的代理方法，也可以到Request类中制定专属的代理方法。</p>
-<p>注意到Manager类的SessionDelegate最下面还有一个respondsToSelector(_:)方法，会根据相应闭包的实现情况决定Manager对象是否响应这个调用，算是基于KVO模式的完善吧。</p>
-<p>现在我们才读完了request方法的部分逻辑，那么Alamofire.swift中封装的其他方法呢？以upload方法为例，我们点进去看看怎么实现的：它也是通过Manager的sharedInstance对象调用，而这里的逻辑，就不再一起装在Manger类中了，作者单独创建Upload类，这个类既扩展了Manager类，进行具体upload形式的定义，也扩展了Request类，对代理方法给出声明，思路很清晰。Download类和Stream类思路与之基本相同，不再赘述。</p>
-<p>再回顾一下之前的逻辑，意识到每个session都会有具体的sessionDelegate与之对应，这是由Manager和Request共同完成的。以request方法为例，在Alamofire.swift中调用request方法后，进入Manager类的request方法，这里会调用session.dataTaskWithRequest(URLRequest.URLRequest)得到这个请求的具体sessiondelegate类型，然后以task参数的形式进入Request类，Request类的初始化方法再switch task的类型，为这个请求分配一个具体的delegate类型。</p>
-<p>到现在为止，已经理清了一个请求发出的过程。接下来就是如何处理返回的问题了。我们回到最开始的那个例子，在request之后，调用的是response方法，这在ResponseSerialization类中给出</p>
-<p>这个类中首先定义了一个协议</p>
-<p>public protocol ResponseSerializerType {<br>    /// The type of serialized object to be created by this <code>ResponseSerializerType</code>.<br>    typealias SerializedObject</p>
-<pre><code>/// The type of error to be created by this `ResponseSerializer` if serialization fails.
-typealias ErrorObject: ErrorType
-
-/**
-    A closure used by response handlers that takes a request, response, data and error and returns a result.
-*/
-var serializeResponse: (NSURLRequest?, NSHTTPURLResponse?, NSData?, NSError?) -&gt; Result&lt;SerializedObject, ErrorObject&gt; { get }
-</code></pre><p>}<br>紧接着，定义了一个结构体ResponseSerializer<value, error:="" errortype="">，实现了这个协议，这个结构体就是我们平时用的responseJSON（）返回的雏形了。再往下看，发现这个类还是Request的扩展，这里只有reponse（）方法返回的是Response类对象，其他的都是Result对象，这个过程中，会根据返回的数据量以及response的状态麻来设定Result是success还是failure，返回给使用者的，就是一个Result类的对象了，使用时通过其value属性获取具体的返回值。</value,></p>
-<p>到此为止，就理清了一个网络请求的request和response过程，不过Alamofire的功能并不止上文提到的那些，库中，还有几个类没有提及到，其中MultipartFormData类负责处理upload方法的特殊情况（较大数据量），ParameterEncoding类遵循RFC协议调整URL的编码，ServerTrustPolicy管理针对不同host的证书，有兴趣的读者可以自行研究</p>
-
+<p>Alamofire.request(.GET, “<a href="https://api.500px.com/v1/photos&quot;).responseJSON(">https://api.500px.com/v1/photos&quot;).responseJSON(</a>) {<br>  (<em>, </em>, data, _) in<br>  println(data)<br>}<br>这是一个简单但是很常用的请求，以GET的方式，向这个网页发送请求，然后在返回的闭包中处理返回（在新版的Alamofire中，已不再是(request, response, data, error)的返回格式）。</p>
+<p>显然,request() 是Alamofire.swift中提供的方法，于是我们点进Alamofire.swift，看看这个类做了哪些事情：<br>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2016/11/18/Alamofire读记/#more">more >></a>
+        </p>
       
     </div>
     <div class="article-info article-info-index">
