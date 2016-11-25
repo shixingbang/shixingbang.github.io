@@ -9,21 +9,18 @@
   <title>Alamofire读记 | Sxb的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="相信大家接触Alamofire并开始做swift的网络编程时，都会搜到http://www.cocoachina.com/ios/20141202/10390.html 
-这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。
-Alamofire.request(.GET, “https://api.500px.com/v1/photos&amp;quot;).resp">
+这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Alamofire读记">
 <meta property="og:url" content="http://yoursite.com/2016/11/18/Alamofire读记/index.html">
 <meta property="og:site_name" content="Sxb的博客">
 <meta property="og:description" content="相信大家接触Alamofire并开始做swift的网络编程时，都会搜到http://www.cocoachina.com/ios/20141202/10390.html 
-这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。
-Alamofire.request(.GET, “https://api.500px.com/v1/photos&amp;quot;).resp">
-<meta property="og:updated_time" content="2016-11-18T14:24:30.000Z">
+这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。">
+<meta property="og:updated_time" content="2016-11-25T15:02:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Alamofire读记">
 <meta name="twitter:description" content="相信大家接触Alamofire并开始做swift的网络编程时，都会搜到http://www.cocoachina.com/ios/20141202/10390.html 
-这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。
-Alamofire.request(.GET, “https://api.500px.com/v1/photos&amp;quot;).resp">
+这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。">
   
     <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
   
@@ -167,8 +164,10 @@ Alamofire.request(.GET, “https://api.500px.com/v1/photos&amp;quot;).resp">
       
         <p>相信大家接触Alamofire并开始做swift的网络编程时，都会搜到<a href="http://www.cocoachina.com/ios/20141202/10390.html" target="_blank" rel="external">http://www.cocoachina.com/ios/20141202/10390.html</a> </p>
 <p>这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。</p>
+<a id="more"></a>
 <p>Alamofire.request(.GET, “<a href="https://api.500px.com/v1/photos&quot;).responseJSON(" target="_blank" rel="external">https://api.500px.com/v1/photos&quot;).responseJSON(</a>) {<br>  (<em>, </em>, data, _) in<br>  println(data)<br>}<br>这是一个简单但是很常用的请求，以GET的方式，向这个网页发送请求，然后在返回的闭包中处理返回（在新版的Alamofire中，已不再是(request, response, data, error)的返回格式）。</p>
-<p>显然,request() 是Alamofire.swift中提供的方法，于是我们点进Alamofire.swift，看看这个类做了哪些事情：<br><a id="more"></a><br>首先，它给出了两个协议，URLStringConvertible和URLRequestConvertible。分别要求给出一个String和一个URLRequest。这是一种典型的面向协议思想，在上面的例子中，这个url并不是直接以String类型传入的，而是作为一个URLStringConvertible协议的URLString属性传入的。这样，只要是实现了URLStringConvertible协议的对象，都可以将其URLString属性作为参数传进request方法。</p>
+<p>显然,request() 是Alamofire.swift中提供的方法，于是我们点进Alamofire.swift，看看这个类做了哪些事情：</p>
+<p>首先，它给出了两个协议，URLStringConvertible和URLRequestConvertible。分别要求给出一个String和一个URLRequest。这是一种典型的面向协议思想，在上面的例子中，这个url并不是直接以String类型传入的，而是作为一个URLStringConvertible协议的URLString属性传入的。这样，只要是实现了URLStringConvertible协议的对象，都可以将其URLString属性作为参数传进request方法。</p>
 <p>然后是一个MARK为Convenience的方法URLRequest，这个方法并没有暴露出去，而是提供给Manager类，以供创建一个基础的NSMutableRequest。</p>
 <p>之后就全是暴露出去的public func了，像request，upload什么的，用户可以直接调用。注意到每一个方法都有两种实现，分别是用户挨个传參和直接传入一个URLRequest。</p>
 <p>这样Alamofire.swift就梳理完了，可以以一个request方法为例，看看它到底做了什么了。只有一行：</p>
@@ -207,13 +206,13 @@ var serializeResponse: (NSURLRequest?, NSHTTPURLResponse?, NSData?, NSError?) -&
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络/">网络</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li></ul>
 	</div>
 
       
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/iOS/">iOS</a>
+	<a class="article-category-link" href="/categories/网络/">网络</a>
 	</div>
 
 
@@ -349,7 +348,7 @@ var serializeResponse: (NSURLRequest?, NSHTTPURLResponse?, NSData?, NSError?) -&
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/网络/" style="font-size: 10px;">网络</a>
+    				<a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a>
     			</div>
     	</section>
     
@@ -359,17 +358,7 @@ var serializeResponse: (NSURLRequest?, NSHTTPURLResponse?, NSData?, NSError?) -&
   		
   			<div class="friends-wrap" id="js-friends">
   			
-  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">友情链接1</a>
-  	        
-  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">友情链接2</a>
-  	        
-  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">友情链接3</a>
-  	        
-  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">友情链接4</a>
-  	        
-  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">友情链接5</a>
-  	        
-  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">友情链接6</a>
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.imjianing.wang/">嘉宁大神</a>
   	        
   	        </div>
   		
