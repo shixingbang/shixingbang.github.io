@@ -8,12 +8,73 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>Sxb的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="QQ信息加密（基础篇）
+本文是我为了混混实验钻研安全技术而对QQ的信息发送做的一次逆向，由于我技术有限，如果大家发现本文有哪里写的不好，还请大家来打我呀多多调指教～
+引言
+先介绍一下对软件进行逆向的一般流程吧，这样大家读这篇文章的时候也能大致明白我在做什么以及整体进行到第几步了。  
+
+拿到程序的可执行文件
+对程序进行外部观察和处理
+阅读头文件以及汇编代码
+动态调试
+编写动态库
+注入
+
+是不是看起">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Sxb的博客">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/04/20/QQ信息加密（基础篇）/index.html">
 <meta property="og:site_name" content="Sxb的博客">
+<meta property="og:description" content="QQ信息加密（基础篇）
+本文是我为了混混实验钻研安全技术而对QQ的信息发送做的一次逆向，由于我技术有限，如果大家发现本文有哪里写的不好，还请大家来打我呀多多调指教～
+引言
+先介绍一下对软件进行逆向的一般流程吧，这样大家读这篇文章的时候也能大致明白我在做什么以及整体进行到第几步了。  
+
+拿到程序的可执行文件
+对程序进行外部观察和处理
+阅读头文件以及汇编代码
+动态调试
+编写动态库
+注入
+
+是不是看起">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg1.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg2.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg3.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg4.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg5.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg6.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg7.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg8.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg9.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg10.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg11.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg12.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg13.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg14.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg15.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg16.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg17.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg18.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg19.png">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Downloads/articleImg20.png">
+<meta property="og:updated_time" content="2017-04-20T14:20:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sxb的博客">
+<meta name="twitter:description" content="QQ信息加密（基础篇）
+本文是我为了混混实验钻研安全技术而对QQ的信息发送做的一次逆向，由于我技术有限，如果大家发现本文有哪里写的不好，还请大家来打我呀多多调指教～
+引言
+先介绍一下对软件进行逆向的一般流程吧，这样大家读这篇文章的时候也能大致明白我在做什么以及整体进行到第几步了。  
+
+拿到程序的可执行文件
+对程序进行外部观察和处理
+阅读头文件以及汇编代码
+动态调试
+编写动态库
+注入
+
+是不是看起">
+<meta name="twitter:image" content="http://yoursite.com/Users/apple/Downloads/articleImg1.png">
   
     <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
   
@@ -137,9 +198,7 @@
 </nav>
 
       <div class="body-wrap">
-        
-  
-    <article id="post-QQ信息加密（基础篇）" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-QQ信息加密（基础篇）" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -267,172 +326,64 @@
   </div>
 </article>
 
-
-
-
-
-
-
-
-
-
   
-    <article id="post-晚来天欲雪" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/25/晚来天欲雪/">晚来天欲雪</a>
-    </h1>
   
+    <a href="/2016/11/25/晚来天欲雪/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">晚来天欲雪</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>晚上十一点半，我听到迅雷发出叮的一声，知道想看的电影下好了，便合上手中的读者，收拾东西准备回宿舍。临走前撇了一眼身后一个广东的姑娘，还在认真得码着C++。</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2016/11/25/晚来天欲雪/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/25/晚来天欲雪/" class="archive-article-date">
-  	<time datetime="2016-11-25T14:25:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/写于夜里/">写于夜里</a></li></ul>
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
 
 
 
 
 
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="QQ信息加密（基础篇）" data-title="" data-url="http://yoursite.com/2017/04/20/QQ信息加密（基础篇）/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"shixingbang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
 
 
-
-  
-    <article id="post-Alamofire读记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/18/Alamofire读记/">Alamofire读记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>相信大家接触Alamofire并开始做swift的网络编程时，都会搜到<a href="http://www.cocoachina.com/ios/20141202/10390.html">http://www.cocoachina.com/ios/20141202/10390.html</a> </p>
-<p>这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2016/11/18/Alamofire读记/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/18/Alamofire读记/" class="archive-article-date">
-  	<time datetime="2016-11-18T14:09:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/网络/">网络</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-一篇测试文章" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/18/一篇测试文章/">测试一下～</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>只是试验一下能不能发东西～</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/18/一篇测试文章/" class="archive-article-date">
-  	<time datetime="2016-11-18T10:49:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-18</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-  
 
 
       </div>
@@ -454,8 +405,8 @@
 		fancybox: true,
 		mathjax: false,
 		animate: true,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
