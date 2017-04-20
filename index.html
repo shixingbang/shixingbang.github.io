@@ -145,113 +145,22 @@
       <input type="hidden" class="isFancy" />
     
     
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/20/QQ信息加密（基础篇）/">QQ信息加密（基础篇</a>
+    </h1>
+  
+
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="QQ信息加密（基础篇）"><a href="#QQ信息加密（基础篇）" class="headerlink" title="QQ信息加密（基础篇）"></a>QQ信息加密（基础篇）</h1><hr>
-<p>本文是我为了<del>混混实验</del>钻研安全技术而对QQ的信息发送做的一次逆向，由于我技术有限，如果大家发现本文有哪里写的不好，还请大家<del>来打我呀</del>多多<del>调</del>指教～</p>
-<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><blockquote>
-<p>先介绍一下对软件进行逆向的一般流程吧，这样大家读这篇文章的时候也能大致明白我在做什么以及整体进行到第几步了。  </p>
-<ol>
-<li>拿到程序的可执行文件</li>
-<li>对程序进行外部观察和处理</li>
-<li>阅读头文件以及汇编代码</li>
-<li>动态调试</li>
-<li>编写动态库</li>
-<li>注入</li>
-</ol>
-<p>是不是看起来很简单呢 （说出来我自己都不信QAQ<br>好了不说废话了、开始对 iPhone 上的 QQ 进行逆向吧！ （各位系好安全带，我要发车了</p>
-</blockquote>
-<h2 id="提取可执行文件"><a href="#提取可执行文件" class="headerlink" title="提取可执行文件"></a>提取可执行文件</h2><blockquote>
-<p>这一步其实非常简单，ssh 到手机上，找到 QQ 所在目录然后 scp 到电脑上就好了，但是由于苹果应用商店对上架过的应用都加了一层壳，使之不能被直接反编译，所以我们要先砸下壳，操作大概是这样：（满脑子都是骚操作<br>&gt;</p>
-<blockquote>
-<p>1.获取 dumpdecrypted，这是一个用来砸壳的库，先下载    </p>
-<p><code>cd /Users/随便创个目录吧我就不乱起名了太尴尬了</code><br><code>git init</code><br><code>git clone git://github.com/stefanesser/dumpdecrypted/</code></p>
-<p>2.编译它    </p>
-<p><code>cd yourpath/dumpdecrypted</code><br><code>make</code><br>这一步执行结束后，会在当前目录下生成一个dumpdecrypted.dylib文件，就是砸壳所需要的那个动态库了</p>
-<p>3.找到 QQ 可执行文件所在位置, 先通过 ssh 连接到手机上：</p>
-<p><code>ssh root@iOSIP</code><br>然后列举出所有进程<br><code>ps -e</code>    </p>
-<p><img src="/Users/apple/Downloads/articleImg1.png" alt="ps -e"><br>上图中的 /var/mobile/Containers/Bundle/Application/CB131FB1-580F-4FA2-A6AE-561A3BB111D3/QQ.app/QQ 就是 QQ 可执行文件的全路径    </p>
-<p>然后我们还需要 QQ 的 Documents路径，需要另一个工具 cycript 来得到， 命令如下：<br><code>cycript -p QQ</code><br><code>[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains: NSUserDomainMask][0]</code></p>
-<p><img src="/Users/apple/Downloads/articleImg2.png" alt="Documents Path"></p>
-<p>得到 Documents 目录路径后，将 dumpdecrypted.dylib 拷贝到目录下<br><code>scp /yourPath/dumpdecrypted/dumpdecrypted.dylib root@iOSIP:/DOCUMENTPATH</code></p>
-<p>开始砸壳    </p>
-<p><code>cd /DOCUMENTPATH</code><br><code>DYLD_INSERT_LIBRARIES=dumpdecrypted.dylib /APPLICATIONPATH</code></p>
-<p>生成 QQ.decrypted 后， 用 scp 将其拷回电脑    </p>
-<p>嗯步骤就是这些了，因为<del>这部分太简单了</del> <del>我太懒了</del> 这些不是重点我就不每一步都配图了<br><strong>注：/APPLICATIONPATH 是 ps -e 得到的那个路径、 /DOCUMENTPATH 是 cycript 里得到的那个路径</strong></p>
-</blockquote>
-</blockquote>
-<h2 id="对程序进行观察和外部处理"><a href="#对程序进行观察和外部处理" class="headerlink" title="对程序进行观察和外部处理"></a>对程序进行观察和外部处理</h2><blockquote>
-<ul>
-<li>首先推荐一个叫 Reveal 的软件，配置好之后可以连接手机，打印出当前页面的各个控件层次结构，方便进行外部观察，效果图大概是这样：<br><img src="/Users/apple/Downloads/articleImg3.png" alt="Reveal Image"><br>因为消息发送的函数一定会在聊天界面里被调用，所以我先在这个页面里观察了一下，大致了解了一下这个界面里控件的类名，诸如 QQChatViewTable, QQAIORichImageCellView.</li>
-</ul>
-<ul>
-<li><p>其次是 class-dump, 用它来获取一个可执行文件的所有类名， 命令如下<br><code>class-dump -s -S -H QQ.dumpdecrypted -o /somePath</code><br>得到 QQ 的所有头文件：<br><img src="/Users/apple/Downloads/articleImg4.png" alt="class-dump Image"><br>以 QQChatViewController.h 为例，我们看到这个类实现了九个协议，包含了七十条属性以及二百四十个方法，不得不说 QQ 是个庞然大物，光一个类就有这么多东西，而整个 QQ 中有 12442 个类。<del>真是吓坏宝宝了</del></p>
-</li>
-<li><p>最后是 cycript， 用它来动态获取程序内部信息，比方说获取当前类类名。<br>在注入进 QQ 后，我先用<br><code>[[UIApp keyWindow] recursiveDescription].toString()</code><br>打印出了当前界面的所有控件，然后在一坨东西里随便找了个 QQInputBar, 然后通过它的地址不断调用<br><code>[#0x???????? nextResponder]</code><br><img src="/Users/apple/Downloads/articleImg5.png" alt="cycript Image"><br>最终得到当前界面 viewController 的类名： QQChatViewController</p>
-</li>
-</ul>
-<p>至此外部分析基本结束，已经判断出聊天界面的类名是 QQChatViewController, 由于消息在这个类里得到发送，所以这个类一定包含了消息发送的方法，下一步就是去头文件里找线索，然后用 lldb + debugserver 动态调试进行确认。</p>
-</blockquote>
-<h2 id="阅读头文件以及汇编代码"><a href="#阅读头文件以及汇编代码" class="headerlink" title="阅读头文件以及汇编代码"></a>阅读头文件以及汇编代码</h2><blockquote>
-<ul>
-<li><p>首先是头文件，在 QQChatViewController 中重点看那些包含 send、 message 之类关键词的函数，我筛选出了这样几个函数：<br><code>- (_Bool)doSendTextMsg:(id)arg1 showText:(id)arg2 isLocation:(_Bool)arg3;</code><br><code>- (void)sendButtonClick:(id)arg1 msg:(id)arg2;</code><br><code>- (_Bool)sendTextMsg:(id)arg1 showText:(id)arg2;</code><br>这三个是和发送文本消息可能直接相关的函数，列入重点考察对象，其他一些发送位置，图片，data 之类的函数就先不管了。</p>
-</li>
-<li><p>打开 hopper ， 看一下这几个函数的实现，看看哪个可能性最高。</p>
-<blockquote>
-<p>因为猜想到第一个函数可能是在后两个之后调用的，所以先看第二个，在 hopper 里找到它的位置：<br><img src="/Users/apple/Downloads/articleImg6.png" alt="sendButtonClick Image"><br>首先它的堆栈调用有点奇怪，明明只传了三个参数，却创建了那么大的堆栈空间，猜想里面有一个参数是一个结构体，有可能是个 messageModel。再往下看主要有一个 onSendMessageButtonTouchUpInside, 很明显这是一个手势处理，我的第一反应是这里进行的是 UI 操作，这个函数也许是把传入的 messageModel 拆分，然后在当前的页面里加载出来的，不一定涉及到消息的发送。</p>
-<hr>
-<p>再来看第第三个：<br><img src="/Users/apple/Downloads/articleImg7.png" alt="sendTextMsg Image"><br><img src="/Users/apple/Downloads/articleImg8.png" alt="unregister Image"><br><img src="/Users/apple/Downloads/articleImg9.png" alt="shareto Image"><br><del>卧槽这一串调用是什么鬼？腾讯的程序员把我做宝搞？</del> 这里的伪代码有点奇怪，我以为会出现一个类似于 MessageMgr 的消息管理单例然后在里面调用消息发送函数的，然而并没有，这里大概是通过 selecotr 调用了 QZoneViewController 里的一个函数，可是这个类看起来已经和 QQChatViewController 没什么关系了，线索中断。</p>
-<hr>
-<p>最后看一下第一个：<br><img src="/Users/apple/Downloads/articleImg10.png" alt="doSendTextMsg Image"><br>看起来调用了和第三个函数一样的方法，但是偏移位置不一样，也许执行的功能并不一样。    </p>
-</blockquote>
-</li>
-</ul>
-<p>也许消息的发送就是在 QZoneViewController 里实现的，也许 QQ 做了某种混淆，这些都只是猜测。既然这里只是外部观察，我就不准备继续研读汇编代码了，准备以这几个函数为入口进行动态调试了。</p>
-</blockquote>
-<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><blockquote>
-<p>写得有点累，不说废话了，直接开始 lldb + debugserver 了。<br>先在手机 terminal 上开启 debugserver：<br><code>debugserver *:1234 -a &quot;QQ&quot;</code>    </p>
-<p><img src="/Users/apple/Downloads/articleImg11.png" alt="debugserver Image"></p>
-<p>电脑连接上去：<br><code>lldb</code><br><code>process connect connect:/iOSIP:1234</code></p>
-<p><img src="/Users/apple/Downloads/articleImg12.png" alt="lldb Image1"></p>
-<p>由于 ASLR （随机地址偏移） 的存在，每次程序运行时会有一个不同的基地址，我们用<br><code>image list -o -f</code><br>打印出程序本次运行的偏移， 最上面那个后缀 QQ 的就是，</p>
-<p><img src="/Users/apple/Downloads/articleImg13.png" alt="lldb Image2"></p>
-<p>可以看出本次 ASLR 值为 24000</p>
-<p>然后为刚才找到的那几个函数打上断点，看看运行时会不会触发以判断它是不是要找的那一个。在 lldb 里为函数打断点需要知道函数的地址，地址计算公式是：<br>地址 = ASLR偏移 + 函数在程序中的地址<br>这里以 <code>- (_Bool)sendTextMsg:(id)arg1 showText:(id)arg2;</code><br>为例为其打上断点：</p>
-<p><img src="/Users/apple/Downloads/articleImg14.png" alt="hopper Image2"><br><img src="/Users/apple/Downloads/articleImg15.png" alt="lldb Image3"><br>输入 c 让程序继续运行，然后在消息发送的界面，输入一段文字后点击发送按钮，程序暂停住了，基本可以确定，这个函数里包含了消息发送。</p>
-<p><del>本来这里还应该加上一段用lldb打印出arg2的值的图的但是网速太慢了效果做不出来了orz</del><br>经过 cycript 和 lldb 的测试，我发现更改 arg2 的值就可以改变消息发送出去时候的值，所以写一个动态库，随便引一个加密算法进来，把 arg2 加密一下再调用原来的发送方法就好啦。</p>
-</blockquote>
-<h2 id="编写动态库"><a href="#编写动态库" class="headerlink" title="编写动态库"></a>编写动态库</h2><blockquote>
-<p>编写动态库使用 theos<br><img src="/Users/apple/Downloads/articleImg16.png" alt="theos Image"></p>
-<p>这里 bundle identifier 的获取我是用 cycript 在程序运行时打印出来的。</p>
-<p>创建好工程后引一下 iOS 自带的密码库， 因为用 RSA 还需要导证书什么的太麻烦了，我就用了 AES 加密，直接贴代码好了：</p>
-<p><img src="/Users/apple/Downloads/articleImg17.png" alt="theos Image2"><br><del>哈哈哈正好一屏幕</del><br><del>写到这儿了精神已经有点不正常了见谅见谅</del></p>
-<p>然后解密算法的话反过来写一下就好了，我就不再贴图浪费篇幅啦</p>
-</blockquote>
-<h2 id="注入"><a href="#注入" class="headerlink" title="注入"></a>注入</h2><blockquote>
-<p>还需要编写一下与 tweak.xm 同目录下的 control 以及 makefile, 我直接贴上来好了反正回了 theos 之后这些都非常简单，（毕竟 theos 只是一个编译模版<br><img src="/Users/apple/Downloads/articleImg18.png" alt="makefile Image"><br><img src="/Users/apple/Downloads/articleImg19.png" alt="control Image"><br>这里记得把 makefile 里的 ip 改成你自己的</p>
-<p>然后在当前目录下执行 make package install , 然后密码什么的该输就输，执行完之后 QQ 会重启，再发送消息的时候就会发现发出去的都是经过 AES 加密的字符串了～<br>效果大概是这样：<br><img src="/Users/apple/Downloads/articleImg20.png" alt="success Image"></p>
-</blockquote>
-<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><blockquote>
-<p>这里写一下本文用到的所有工具的配置方式：    </p>
-<blockquote>
-<ul>
-<li><p>theos<br><code>export THEOS=/opt/theos</code><br><code>sudo git clone git://github.com/DHowett/theos.git</code>    </p>
-</li>
-<li><p>cycript<br>[官网] (<a href="http://www.cycript.org" target="_blank" rel="external">http://www.cycript.org</a>) </p>
-</li>
-<li><p>reveal<br>不知道有没有的下了，可以去找找，我有空的话传一份到 github上？ （所以大概是没空了hhhh</p>
-</li>
-<li><p>class-dump<br>[官网] (<a href="http://stevenygard.com/projects/class-dump" target="_blank" rel="external">http://stevenygard.com/projects/class-dump</a>)<br>下载好后把 class-dump 复制到 /user/bin 下，然后在 terminal 执行<br><code>sudo chmod 777 /usr/bin/class-dump</code></p>
-</li>
-<li><p>debugserver<br>电脑端 <code>scp root@iOSIP:/Developer/usr/bin/debugserver ~/debugserver</code><br><code>lipo -thin arm64 ~/debugserver -output ~/debugserver</code><br>下载 <a href="http://iosre.com/ent.xml" target="_blank" rel="external">http://iosre.com/ent.xml</a> 到 /Users/snakeninny 目录，然后<br>/opt/theos/bin/ldid -Sent.xml debugserver<br>将其拷回 iOS：<br><code>scp ~/debugserver root@iOSIP:/usr/bin/debugserver</code><br><code>ssh root@iOSIP</code><br>在手机上为其赋予执行权限：<br>chmod +x /user/bin/debugserver</p>
-</li>
-<li><p>hopper<br>同 reveal 2333</p>
-</li>
-</ul>
-</blockquote>
-</blockquote>
-<p>这篇文章主要还是供入门吧，里面并没有涉及到太多汇编代码阅读以及 lldb + debugserver 的动态调试，过<del>几个月</del>几天我再写一份添加解密功能的 tweak 作为进阶篇吧 以上～</p>
-
+        <p>本文是我为了<del>混混实验</del>钻研安全技术而对QQ的信息发送做的一次逆向，由于我技术有限，如果大家发现本文有哪里写的不好，还请大家<del>来打我呀</del>多多<del>调</del>指教～</p>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2017/04/20/QQ信息加密（基础篇）/#more">more >></a>
+        </p>
       
     </div>
     <div class="article-info article-info-index">
@@ -260,6 +169,11 @@
   	<time datetime="2017-04-20T13:59:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-20</time>
 </a>
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS-逆向/">iOS 逆向</a></li></ul>
+	</div>
+
       
 
       <div class="clearfix"></div>
@@ -493,7 +407,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a>
+    				<a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/iOS-逆向/" style="font-size: 10px;">iOS 逆向</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a>
     			</div>
     	</section>
     
