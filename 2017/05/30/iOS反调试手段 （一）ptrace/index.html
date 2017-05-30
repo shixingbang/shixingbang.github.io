@@ -6,14 +6,32 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Sxb的博客</title>
+  <title>iOS反调试手段 （一）ptrace | Sxb的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Sxb的博客">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手
+引言
+就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。
+
+pt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS反调试手段 （一）ptrace">
+<meta property="og:url" content="http://yoursite.com/2017/05/30/iOS反调试手段 （一）ptrace/index.html">
 <meta property="og:site_name" content="Sxb的博客">
+<meta property="og:description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手
+引言
+就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。
+
+pt">
+<meta property="og:image" content="http://yoursite.com/assets/ptrace3.png">
+<meta property="og:updated_time" content="2017-05-30T05:56:28.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Sxb的博客">
+<meta name="twitter:title" content="iOS反调试手段 （一）ptrace">
+<meta name="twitter:description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手
+引言
+就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。
+
+pt">
+<meta name="twitter:image" content="http://yoursite.com/assets/ptrace3.png">
   
     <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
   
@@ -137,9 +155,7 @@
 </nav>
 
       <div class="body-wrap">
-        
-  
-    <article id="post-iOS反调试手段 （一）ptrace" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-iOS反调试手段 （一）ptrace" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -148,8 +164,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/30/iOS反调试手段 （一）ptrace/">iOS反调试手段 （一）ptrace</a>
+    <h1 class="article-title" itemprop="name">
+      iOS反调试手段 （一）ptrace
     </h1>
   
 
@@ -224,225 +240,64 @@ MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;
   </div>
 </article>
 
-
-
-
-
-
-
-
-
-
   
-    <article id="post-QQ信息加密（基础篇）" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/20/QQ信息加密（基础篇）/">QQ信息加密（基础篇）</a>
-    </h1>
   
+    <a href="/2017/04/20/QQ信息加密（基础篇）/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">QQ信息加密（基础篇）</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<p>本文是我为了<del>混混实验</del>钻研安全技术而对QQ的信息发送做的一次逆向，由于我技术有限，如果大家发现本文有哪里写的不好，还请大家<del>来打我呀</del>多多<del>调</del>指教～</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2017/04/20/QQ信息加密（基础篇）/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/04/20/QQ信息加密（基础篇）/" class="archive-article-date">
-  	<time datetime="2017-04-20T13:59:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/逆向/">逆向</a></li></ul>
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
 
 
 
 
 
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="iOS反调试手段 （一）ptrace" data-title="iOS反调试手段 （一）ptrace" data-url="http://yoursite.com/2017/05/30/iOS反调试手段 （一）ptrace/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"shixingbang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
 
 
-
-  
-    <article id="post-晚来天欲雪" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/25/晚来天欲雪/">晚来天欲雪</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>晚上十一点半，我听到迅雷发出叮的一声，知道想看的电影下好了，便合上手中的读者，收拾东西准备回宿舍。临走前撇了一眼身后一个广东的姑娘，还在认真得码着C++。</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2016/11/25/晚来天欲雪/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/25/晚来天欲雪/" class="archive-article-date">
-  	<time datetime="2016-11-25T14:25:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/写于夜里/">写于夜里</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Alamofire读记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/18/Alamofire读记/">Alamofire读记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>相信大家接触Alamofire并开始做swift的网络编程时，都会搜到<a href="http://www.cocoachina.com/ios/20141202/10390.html">http://www.cocoachina.com/ios/20141202/10390.html</a> </p>
-<p>这篇文章吧，这篇文章从应用的角度，介绍了几个基础的Alamofire中封装的网络请求方法。</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2016/11/18/Alamofire读记/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/18/Alamofire读记/" class="archive-article-date">
-  	<time datetime="2016-11-18T14:09:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/网络/">网络</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-一篇测试文章" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/18/一篇测试文章/">测试一下～</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>只是试验一下能不能发东西～</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/18/一篇测试文章/" class="archive-article-date">
-  	<time datetime="2016-11-18T10:49:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-18</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-  
 
 
       </div>
@@ -464,8 +319,8 @@ MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;
 		fancybox: true,
 		mathjax: false,
 		animate: true,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
