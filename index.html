@@ -159,51 +159,9 @@
       
         <hr>
 <p>是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手</p>
-<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><blockquote>
-<p>就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。</p>
-</blockquote>
-<h2 id="ptrace-介绍"><a href="#ptrace-介绍" class="headerlink" title="ptrace 介绍"></a>ptrace 介绍</h2><blockquote>
-<p>网上其实已经有一篇挺好的<a href="http://www.linuxjournal.com/article/6100?page=0" target="_blank" rel="external">文章</a> 对 ptrace 做了详细介绍了，这里我再简单得概括一下吧。<br>ptrace 的运作流程主要是这样：     </p>
-<ul>
-<li>首先 fork 出一个子进程</li>
-<li>子进程中执行我们想要跟踪的程序，触发系统调用后把控制权交还父进程</li>
-<li>父进程执行 wait() 操作，等待子进程交还控制权</li>
-</ul>
-<p>如果要说的具体一点的话，先聊 fork ，这个函数的用法举个例子就是：    </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">pid_t child;  	  	</div><div class="line">child = fork();    </div><div class="line">if(child == 0) &#123;</div><div class="line">	//fork出的进程号为0，即子进程</div><div class="line">&#125;</div><div class="line">else if(child &gt; 0) &#123;</div><div class="line">	//fork出的进程号大于0，即父进程</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>执行完 fork() 操作后，子进程拷贝父进程的所有资源，然后父进程和子进程同时往下走，也就是说接下来的 if else 父子进程会各自执行。</p>
-<p>然后再聊一下子进程返回控制权的过程：<br>首先我们知道，操作系统又用户态进入内核态有三种方式，系统调用、异常、中断。简单来说，子进程调用一个 int 0x80 ; 这是一个软中断指令，将当前的寄存器信息放进内核栈之后进入内核态，触发系统调用。<br>此时，内核检查这个进程是否已被 trace ，如果是，则将这个进程的控制权交给正在 trace 它的那个进程。查资料了解到任何时候，子进程只能被父进程这唯一一个进程所 trace ，所以我猜我们所用的 gdb， lldb 等动态调试器应该是作为父进程来启动我们想要追踪的程序的。</p>
-<p>父进程执行 wait() 的操作是比较好理解的，只要先停下来等待子进程停下后的内核通知，就可以继续执行然后读取子进程寄存器值之类的东西了。</p>
-<p>最后再用代码体现一下 ptrace 的使用方法吧：  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">long ptrace(enum __ptrace_request request,</div><div class="line">            pid_t pid,</div><div class="line">            void *addr,</div><div class="line">            void *data);</div><div class="line">```    </div><div class="line"></div><div class="line">&gt; 这是 ptrace 的调用形式，它的参数可以有这些：</div><div class="line">&gt;</div></pre></td></tr></table></figure>
-</blockquote>
-<p>PTRACE_TRACEME,<br>PTRACE_PEEKTEXT,<br>PTRACE_PEEKDATA,<br>PTRACE_PEEKUSER,<br>PTRACE_POKETEXT,<br>PTRACE_POKEDATA,<br>PTRACE_POKEUSER,<br>PTRACE_GETREGS,<br> PTRACE_GETFPREGS,<br>PTRACE_SETREGS,<br> PTRACE_SETFPREGS,<br>PTRACE_CONT,<br> PTRACE_SYSCALL,<br>PTRACE_SINGLESTEP,<br>PTRACE_DETACH<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">&gt; 每条参数具体什么意思就不解释了</div><div class="line"></div><div class="line">## 使用 ptrace 来阻断动态调试</div><div class="line">&gt; 之前在论坛里看到狗神破解高德地图的[文章](http://iosre.com/t/7-2-0-ios/770)，也由此了解到高德地图是通过在 main 函数里创建 ptrace 来阻断 lldb 的调试，代码如下：</div></pre></td></tr></table></figure></p>
-<p>#import <dlfcn.h></dlfcn.h></p>
-<p>typedef int (*ptrace_ptr_t)(int _request, pid_t _pid, caddr_t _addr, int _data);</p>
-<p>#if !defined(PT_DENY_ATTACH)</p>
-<p>#define PT_DENY_ATTACH 31</p>
-<p>#endif  // !defined(PT_DENY_ATTACH)</p>
-<p>void disable_gdb() {<br>    void* handle = dlopen(0, RTLD_GLOBAL | RTLD_NOW);<br>    ptrace_ptr_t ptrace_ptr = dlsym(handle, “ptrace”);<br>    ptrace_ptr(PT_DENY_ATTACH, 0, 0, 0);<br>    dlclose(handle);<br>}</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&gt; 其实本来不需要这么复杂，直接</div></pre></td></tr></table></figure>
-<p>#import <sys ptrace.h=""></sys></p>
-<p>ptrace(31,0,0,0); // 31 是 PT_DENY_ATTACH<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&gt; 但是由于 iOS 的运行环境下没有 sys/ptrace 抛出，所以只能使用 dlopen 的方式使用 ptrace， 注：</div></pre></td></tr></table></figure></p>
-<p>dlopen： 当path 参数为0是,他会自动查找 $LD_LIBRARY_PATH,<br>$DYLD_LIBRARY_PATH,<br>$DYLD_FALLBACK_LIBRARY_PATH 和 当前工作目录中的动态链接库.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&gt; 编译通过，先在虚拟机上运行了一下，发现执行到 ptrace 函数后，屏幕直接黑了，再通过 xcode 让程序在手机上跑了一下，程序直接闪退了，但是手机上直接打开程序的话就没有问题。据此我推断通过 xcode 来开程序，xcode 相当于就是一个父进程，但是程序是禁止父进程的控制的，所以直接闪退了。后来我又尝试通过 debugserver 来启动程序，得到一下结果：    </div><div class="line">&gt; ![img1](/assets/ptrace2.png)</div><div class="line">&gt; </div><div class="line">&gt; 可以看到这里是一个 Segmentation fault 11，虽然查到的结果显示这可能是访问了一个不存在的内存页，但心里还是知道这是因为 ptrace 的反调试。    </div><div class="line">&gt; </div><div class="line">&gt; 再来看一下反编译我的 demo 程序后得到的汇编代码，发现在 main 函数里，确实调用了 disable_gdb 这个函数：    </div><div class="line">&gt; ![img2](/assets/ptrace1.png)    </div><div class="line">&gt; 看的出来我这里是在自动释放池声明之前执行了 ptrace，不过我目前还不太清楚这个函数在什么时候执行最好。</div><div class="line">&gt; </div><div class="line">&gt; 注：这里因为程序是我自己写的，我就直接知道 ptrace 的部分写在 main 函数里了，如果在动态调试别人的 app 时怀疑因为 ptrace 被阻挡，可以使用 debugserver **启动** app，注意是启动而不是附加。然后 b ptrace，找到应用挺住的地址，再减去随机地址便宜得到调用的静态地址，然后确定是哪个方法调用的。</div><div class="line"></div><div class="line">## 反反调试</div><div class="line">&gt; 要跳过 ptrace 的反调试，论坛里也给出了明确的思路，就是 hook 掉 ptrace 函数本身。可以在上一步的操作里得到函数地址，以上图为例，地址就是 0x100006b00，然后再加上偏移，就可以得到函数指针位置了，然后做一个 MSHookFunction，就可以替换掉原来的实现， tweak 如下：</div><div class="line">&gt;</div></pre></td></tr></table></figure></p>
-<p>#import <substrate.h></substrate.h></p>
-<p>#import <mach-o dyld.h=""></mach-o></p>
-<p>#import <dlfcn.h></dlfcn.h></p>
-<p>void (*old_disable_gdb)(void);</p>
-<p>void new_disable_gdb(void) {<br>NSLog(@”changed”);<br>}</p>
-<p>%ctor<br>{<br>        unsigned long _disable_gdb = (_dyld_get_image_vmaddr_slide(0) + 0x100006acc) | 0x1;</p>
-<pre><code>NSLog(@&quot;_dyld_get_image_vmaddr_slide: %ld&quot;, _dyld_get_image_vmaddr_slide(0));
-if (_disable_gdb) NSLog(@&quot;found&quot;);
-MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;old_disable_gdb);
-</code></pre><p>}<br>```</p>
-<p>&gt;<br>这里通过 dyld 获取随机地址偏移，再加上 hopper 中看到的函数地址，得到运行时函数指针地址，用它作为 symbol，调用 MSHookFunction 实现方法动态替换， MSHookFunction 的说明可以看<a href="http://www.cydiasubstrate.com/api/c/MSHookFunction/" target="_blank" rel="external">这里</a>    </p>
-<h2 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h2><blockquote>
-<p>其实在做 demo 的时候遇到了一个 bug ，就是在加持了反反 ptrace 的 tweak 后，打开程序时还是会出现一个由于 EXC_BAD_INSTRUCTION 导致的 crash，报错截图如下：<br><img src="/assets/ptrace3.png" alt="img3"><br>经检查， tweak 中 hook 函数的地址是没有问题的，但是因为 EXC_BAD_INSTRUCTION 的错误范围太广，我即使加了 NSZombieEnabled 变量依然找不出错误原因，我也没发现有函数中有哪个变量在声明前就被使用了，调了很久都没思路，如果有哪位大佬知道原因的话还望告知一下谢谢～</p>
-</blockquote>
-<p>以上～</p>
-
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2017/05/30/iOS反调试手段 （一）ptrace/#more">more >></a>
+        </p>
       
     </div>
     <div class="article-info article-info-index">
@@ -215,6 +173,61 @@ MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反调试/">反调试</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/调试/">调试</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-对某统计 SDK 的一次拆解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/07/对某统计 SDK 的一次拆解/">对某统计 SDK 的一次拆解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<blockquote>
+<p><strong>首先声明，本文仅供技术学习与交流，请勿用于任何黑灰产</strong><br><del>其实我也不清楚这篇笔记能不能发出来</del>如有问题，请联系 1398707587@qq.com</p>
+</blockquote>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2017/05/07/对某统计 SDK 的一次拆解/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/05/07/对某统计 SDK 的一次拆解/" class="archive-article-date">
+  	<time datetime="2017-05-07T06:13:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/逆向/">逆向</a></li></ul>
 	</div>
 
       
@@ -503,7 +516,7 @@ MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 10px;">逆向</a>
+    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a>
     			</div>
     	</section>
     

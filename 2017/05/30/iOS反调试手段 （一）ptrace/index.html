@@ -8,29 +8,17 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>iOS反调试手段 （一）ptrace | Sxb的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手
-引言
-就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。
-
-pt">
+  <meta name="description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS反调试手段 （一）ptrace">
 <meta property="og:url" content="http://yoursite.com/2017/05/30/iOS反调试手段 （一）ptrace/index.html">
 <meta property="og:site_name" content="Sxb的博客">
-<meta property="og:description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手
-引言
-就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。
-
-pt">
+<meta property="og:description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手">
 <meta property="og:image" content="http://yoursite.com/assets/ptrace3.png">
-<meta property="og:updated_time" content="2017-05-30T05:56:28.000Z">
+<meta property="og:updated_time" content="2017-05-30T06:05:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS反调试手段 （一）ptrace">
-<meta name="twitter:description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手
-引言
-就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。
-
-pt">
+<meta name="twitter:description" content="是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手">
 <meta name="twitter:image" content="http://yoursite.com/assets/ptrace3.png">
   
     <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
@@ -175,6 +163,7 @@ pt">
       
         <hr>
 <p>是时候学一波 iOS 的安全防护手段了，毕竟我去公司是研究移动安全的不是去搞破坏的 ／摊手</p>
+<a id="more"></a>
 <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><blockquote>
 <p>就目前我所了解的 iOS 逆向手段，工具就那么几个，主要难点也就是动态调试和读汇编了。所以要做防护的话，第一个思路就是阻断动态调试，让攻击者无法实时获取函数调用情况以及各种参数值。要做到这点，就得先知道动态调试的原理是什么，为什么调试器可以在函数地址上打断点让它停下以及是怎么做到单步执行的。</p>
 </blockquote>
@@ -244,8 +233,8 @@ MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;
 <nav id="article-nav">
   
   
-    <a href="/2017/04/20/QQ信息加密（基础篇）/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">QQ信息加密（基础篇）</div>
+    <a href="/2017/05/07/对某统计 SDK 的一次拆解/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">对某统计 SDK 的一次拆解</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -358,7 +347,7 @@ MSHookFunction((void *)_disable_gdb,(void *)&amp;new_disable_gdb, (void **)&amp;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 10px;">逆向</a>
+    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a>
     			</div>
     	</section>
     
