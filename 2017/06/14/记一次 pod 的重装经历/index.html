@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://yoursite.com">
+  <title>记一次 pod 重装经历 | Sxb的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="大概是今年一月份发现的这个问题，就是我的 pod 用不了 openssl，这会带来一个什么问题呢，就是用不了 https 的服务。带来最直接的后果就是 gem source 里，添加不了 https 的源，只能用官方提供的一个比较老版本的 http 源。由此引发的问题就是，我的 pod 用不了 update 指令，因为 update 时会检查当前引用库的最新地址，which 我的 gem 源并不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次 pod 重装经历">
+<meta property="og:url" content="http://yoursite.com/2017/06/14/记一次 pod 的重装经历/index.html">
+<meta property="og:site_name" content="Sxb的博客">
+<meta property="og:description" content="大概是今年一月份发现的这个问题，就是我的 pod 用不了 openssl，这会带来一个什么问题呢，就是用不了 https 的服务。带来最直接的后果就是 gem source 里，添加不了 https 的源，只能用官方提供的一个比较老版本的 http 源。由此引发的问题就是，我的 pod 用不了 update 指令，因为 update 时会检查当前引用库的最新地址，which 我的 gem 源并不">
+<meta property="og:image" content="http://yoursite.com/assets/pod1.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod2.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod3.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod4.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod5.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod6.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod7.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod8.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod9.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod10.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod11.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod12.png">
+<meta property="og:image" content="http://yoursite.com/assets/pod13.png">
+<meta property="og:updated_time" content="2017-06-14T10:13:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次 pod 重装经历">
+<meta name="twitter:description" content="大概是今年一月份发现的这个问题，就是我的 pod 用不了 openssl，这会带来一个什么问题呢，就是用不了 https 的服务。带来最直接的后果就是 gem source 里，添加不了 https 的源，只能用官方提供的一个比较老版本的 http 源。由此引发的问题就是，我的 pod 用不了 update 指令，因为 update 时会检查当前引用库的最新地址，which 我的 gem 源并不">
+<meta name="twitter:image" content="http://yoursite.com/assets/pod1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/assets/avatar.jpeg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Sxb</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">会点正向，会点逆向～</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/shixingbang/" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/p/1005055507014422" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/shi-xing-bang-48-16" title="zhihu">zhihu</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Sxb</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/assets/avatar.jpeg" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Sxb</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">会点正向，会点逆向～</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/shixingbang/" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/p/1005055507014422" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/shi-xing-bang-48-16" title="zhihu">zhihu</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-记一次 pod 的重装经历" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      记一次 pod 重装经历
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>大概是今年一月份发现的这个问题，就是我的 pod 用不了 openssl，这会带来一个什么问题呢，就是用不了 https 的服务。带来最直接的后果就是 gem source 里，添加不了 https 的源，只能用官方提供的一个比较老版本的 http 源。由此引发的问题就是，我的 pod 用不了 update 指令，因为 update 时会检查当前引用库的最新地址，which 我的 gem 源并不能提供。之前也尝试过解决这个问题，然而.. 所以这么长一段时间我一直在用一个替代方案： pod install，这个指令可以帮我安装上所需要的库，但是这个库的版本不一定是最新的。直到最近，</p>
+<a id="more"></a>
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><blockquote>
+<p> 上述的方案在自己一个人做开发时勉强能用，然而最近和朋友一起写项目，git pull 完他的代码后，pod install ，然后发现了这个情况：    </p>
+<p><img src="/assets/pod1.png" alt="pod_img1">    </p>
+<p>大意是，他的 podfile 里，要求 Alamofire 的版本大于等于 4.4 ，但是我的 cocoapods 好像并不能满足这个要求。<br>于是我尝试按照终端里给的提示 <del>后来我才知道，以终端的智商并不能给出什么有效提示</del> 执行pod repo update 试试：    </p>
+<p><img src="/assets/pod2.png" alt="pod_img2"></p>
+<p>Oh no, an error occurred~       </p>
+<p>看了一下具体的 error 原因，找到了这么一句话：<br><code>in require: cannot load such file -- openssl (LoadError)</code><br>好吧，还是 openssl 的锅。    </p>
+<p>从后来终端的输入记录看，我好像并没有死心，还是在尝试通过 openssl 来给 gem 添加源：<br><img src="/assets/pod3.png" alt="pod_img3"></p>
+<p>以上输入的几个命令，都遇到了 openssl 的问题。感觉还是回避这个问题的话，会影响协同开发，想想还是把这个问题处理掉吧。</p>
+</blockquote>
+<h2 id="解决历程"><a href="#解决历程" class="headerlink" title="解决历程"></a>解决历程</h2><blockquote>
+<p>看上一张图的最后，给我的提示是 install OpenSSL and rebuild ruby.<br>去网上查了一下 rebuild ruby 的方法，了解到可以重新设置 configure 然后 make ：<br><img src="/assets/pod4.png" alt="pod_img4"></p>
+<p>在 ruby 的可执行目录下，并没有 configure 这个文件，倒是有一个 config 文件，我给它加了执行权限后，执行了那条指令，然后 make，失败，到文件夹里看了一下，发现并没有 makefile 文件。所以说，应该不是对这个目录进行操作。<br><img src="/assets/pod5.png" alt="pod_img5"></p>
+<p>期间进行了一次 brew info openssl，通过 brew 这个平台又确认了一下我的系统中是有 openssl 这个模块的。既然这样，我萌生了一个<del>绝妙的</del>想法：重装ruby吧！</p>
+<p><img src="/assets/pod6.png" alt="pod_img6"></p>
+<p>于是乎我卸掉了通过 rvm 装的 ruby2.3，尝试装个 ruby2.4试试：<br><img src="/assets/pod7.png" alt="pod_img7"> </p>
+<p>安装很成功，然后再次尝试给 gem source 里添加一个 https 的源！ 然而..</p>
+<p>灵机一动，为什么不试试系统自带的 ruby呢！于是我再次卸载了 ruby2.4 ，然后再次尝试给 gem source 里添加 https 源：<br><img src="/assets/pod8.png" alt="pod_img8"></p>
+<p>哇居然成功了！感觉系统自带的 ruby 好厉害耶！那就再试一下 pod install吧！<br><img src="/assets/pod9.png" alt="pod_img9"></p>
+<p>等等，cocoapods 没了？？？ 看了下 ruby，发现系统的是 2.0.0版本的，也删了吧妈卖批，要你们有什么用。然后<br><code>Operation not permitted</code><br>绝望。系统自带的 ruby 不让删。<br>于是我低头了，又装上了 rvm 提供的 ruby2.4…这次从之前断掉的 configure 线索入手吧，看看能不能链接 openssl 后重新编译 ruby。这次我在 ruby2.4 安装的过程中，无意间发现终端滚出了一条 ruby 的安装目录，瞬间意识到重编译这种事情应该在安装目录下做啊，之前是在执行目录下 make，难怪没有成功。<br>于是我链接 openssl 目录后重新编译：<br><img src="/assets/pod10.png" alt="pod_img10"></p>
+<p>又是一个坑，里面有些东西缺少权限。我最开始的做法是到 configure 文件里注释掉这个.h文件，毕竟报错里只有这一个文件没有权限。然而再次执行后发现，又多了好多好多文件没有执行权限…去网上查了一会儿，意识到可能是这个命令本身没加执行权限，然而我已经对 configure文件瞎几把改了一通…于是只能把 ruby 再次卸掉重装 <del>心疼ruby一秒</del></p>
+<p><img src="/assets/pod11.png" alt="pod_img11"></p>
+<p>重装完 ruby 后，摸索了一通，先尝试给 ./configure 加执行权限，没起作用，之后发现直接 sudo 执行这条指令就行…</p>
+<p><code>sudo make install</code><br>成功    </p>
+<p>然后 gem 重装一波 cocoapods，又失败了..后来发现好像链接的 openssl 有问题，又重装了两遍，具体步骤就跳过吧。</p>
+<p>知道我最后怎么解决的吗？ 我自己也不知道（笑<br>其实好像是执行了一句 brew upgrade ，然后又重装了一遍 ruby ：<br><img src="/assets/pod12.png" alt="pod_img12"></p>
+<p>终于<del>他娘的</del>看到了一屏幕的绿字..</p>
+<p>ok， ruby 和 gem 的环境配好了，再来一次 pod install 吧：<br><img src="/assets/pod13.png" alt="pod_img13"></p>
+<p>完成。</p>
+</blockquote>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><blockquote>
+<p>pod 的这个坑，前前后后尝试解决过四五次吧，每次都花了两三个小时的时间，之前几次都失败了。这次或许是运气好，终于把这个坑修好了。回想大一的时候刚接触 hexo，自己搭博客，也是失败了五六次，期间花了可能20+个小时，然而，我从没有放弃过，最后还是在不知道第几次的配置过程中把 hexo 弄好了，跑起了自己的博客。<br>想想 debug 这种事，能力和经验固然重要，但我觉得毅力也是不可或缺的。想想自己活了二十一年了，有对什么事情说过“放弃”这种话么，好像还没有。我就是这样一个固执的人吧，失败一次就再来一次呗，失败两次再来两次，放弃？不存在的。<br>（自吹一波，哈哈哈</p>
+</blockquote>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/14/记一次 pod 的重装经历/" class="archive-article-date">
+  	<time datetime="2017-06-14T10:13:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/流水账/">流水账</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/05/30/iOS反调试手段 （一）ptrace/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">iOS反调试手段 （一）ptrace</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="记一次 pod 的重装经历" data-title="记一次 pod 重装经历" data-url="http://yoursite.com/2017/06/14/记一次 pod 的重装经历/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"shixingbang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Sxb
+    	</div>
+      	<div class="footer-right">
+
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/流水账/" style="font-size: 10px;">流水账</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.imjianing.wang/">嘉宁大神</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">很惭愧&lt;br&gt;&lt;br&gt;只做了一点微小的工作&lt;br&gt;谢谢大家</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

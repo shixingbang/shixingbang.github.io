@@ -14,10 +14,19 @@
 <meta property="og:url" content="http://yoursite.com/2017/05/07/对某统计 SDK 的一次拆解/index.html">
 <meta property="og:site_name" content="Sxb的博客">
 <meta property="og:description" content="首先声明，本文仅供技术学习与交流，请勿用于任何黑灰产其实我也不清楚这篇笔记能不能发出来如有问题，请联系 1398707587@qq.com">
-<meta property="og:updated_time" content="2017-05-30T06:05:00.000Z">
+<meta property="og:image" content="http://yoursite.com/assets/umImg1.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg2.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg3.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg5.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg6.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg7.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg8.png">
+<meta property="og:image" content="http://yoursite.com/assets/umimg9.jpg">
+<meta property="og:updated_time" content="2017-05-07T06:18:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对某统计 SDK 的一次拆解">
 <meta name="twitter:description" content="首先声明，本文仅供技术学习与交流，请勿用于任何黑灰产其实我也不清楚这篇笔记能不能发出来如有问题，请联系 1398707587@qq.com">
+<meta name="twitter:image" content="http://yoursite.com/assets/umImg1.png">
   
     <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
   
@@ -164,7 +173,63 @@
 <p><strong>首先声明，本文仅供技术学习与交流，请勿用于任何黑灰产</strong><br><del>其实我也不清楚这篇笔记能不能发出来</del>如有问题，请联系 1398707587@qq.com</p>
 </blockquote>
 <a id="more"></a>
-<p>本文暂时隐藏</p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><blockquote>
+<p>对友盟 SDK 进行分析其实是我面试的一家公司给我出的题目，基础要求是还原友盟的客户端 SDK 向服务器发送数据包的整个流程，进阶要求是还原出过程中涉及到的加密算法。 我只在这里分享一下对整个流程进行追踪的过程。</p>
+</blockquote>
+<h2 id="第一步、安装-SDK"><a href="#第一步、安装-SDK" class="headerlink" title="第一步、安装 SDK"></a>第一步、安装 SDK</h2><blockquote>
+<p>要对 SDK 的运行流程进行追踪肯定是要先把它集成到一个 app 里，先稍微做点正向开发然后再看的，<del>不然纯静态分析玩蛇？</del> 于是我先建了个叫做 UMTest 的 project， 直接静态引入友盟库。按照友盟给的开发文档，应当是在 AppDelegate 里初始化，但是这样有个缺点就是不方便在初始化函数上打断点了，于是我把他写在了 ViewController 的一个 button 上，通过点按 button 来初始化。     </p>
+<p>-(IBAction)buttonClicked:(id)sender {</p>
+</blockquote>
+<pre><code>NSLog(@&quot;buttonClicked&quot;);
+
+UMConfigInstance.appKey = @&quot;58fb50429f06fd71060010f8&quot;;
+UMConfigInstance.channelId = @&quot;&quot;;
+[MobClick setLogEnabled:true];
+
+[MobClick startWithConfigure:UMConfigInstance];
+</code></pre><blockquote>
+<p>}</p>
+<p><del>这里为什么方法名没有算到代码块里啊，有没有懂的同学教下我怎么改</del></p>
+<p>这样配置之后，点按 button 即可启动，也方便了动态调试。</p>
+</blockquote>
+<h2 id="第二步、猜一波"><a href="#第二步、猜一波" class="headerlink" title="第二步、猜一波"></a>第二步、猜一波</h2><blockquote>
+<p>要想追踪友盟向服务器发消息的流程，肯定要先知道程序是在什么时候调用的相关函数。我最开始的思路是到 hopper 中翻翻函数名，找一些 post，send之类函数，在上面打断点，然后看它会不会被触发。<br>很快就找到了一个有意思的函数：<br><code>[UMANWorker postDataToServer:withFile:]</code><br>打上断点，点按 button ，发现程序直接停住了，看来在启动 Configure 的时候就会发送一次数据包了，我们打印出函数的两个参数：    </p>
+<p><img src="/assets/umImg1.png" alt="img1"></p>
+<p>可以看到服务器地址是 <a href="https://alogs.umeng.com/app_logs" target="_blank" rel="external">https://alogs.umeng.com/app_logs</a> , 发送的文件是一个  “时间戳 _envelope.log” 文件，在其后续的汇编代码中可以看到，这个文件作为 data 被加入到请求中，发送给了服务器。这里我的第一反应是能不能直接在这儿截取下 log 文件，对其做改动之后再发出去呢？于是我把这个 log 文件拷贝到了电脑上，看了一下里面的内容：       </p>
+<p><img src="/assets/umimg2.png" alt="img2"></p>
+<p>全是乱码，大概是个 NSData 类型的东西，在不知道编码方式的情况下显然是不能解密的，我也是想太多了- -、<br>所以现在的关注点就可以放到这个 log 文件是如何生成上的了。</p>
+</blockquote>
+<h2 id="第三步、找线索"><a href="#第三步、找线索" class="headerlink" title="第三步、找线索"></a>第三步、找线索</h2><blockquote>
+<p>既然程序调用了 postDataToServer 的方法，我就先打印一下堆栈调用，看一下在此之前程序还干了什么：</p>
+<p><img src="/assets/umimg3.png" alt="img3"></p>
+<p>看到这里执行了    </p>
+<p><code>[UMANWorker main]</code>    </p>
+<p>之后直接调用了这个函数，觉得非常诡异，程序刚启动就向服务器发消息吗，发送的是和本次启动有关的消息吗？可是这样的话本次启动相关的文件来得及生成吗？并没有看到相关方法啊。<br>于是仔细读了一下友盟的开发文档，了解到这应该是配置策略的问题，当程序不联网时，会把这次的 log 文件先缓存下来，等到下次启动再尝试发送。所以 sdk 刚启动时触发这个方法应该仅仅是发送了上次的缓存，并没有发送本次的数据。<br>那，本次的数据在什么时候发送呢？</p>
+</blockquote>
+<h2 id="第四步、各种调试"><a href="#第四步、各种调试" class="headerlink" title="第四步、各种调试"></a>第四步、各种调试</h2><blockquote>
+<p> 刚才那个问题我想了好久都没想出来，后来才偶然发现，当程序进入后台时也会触发这个方法。<br>但是打印出上面那个函数的堆栈调用后，非常绝望，因为它的堆栈调用和之前一样，还是没有什么有用的信息。看来还存在一些别的函数和消息发送有关。<br>因为这里的断点是程序进入后台之后触发的，所以这里想在进入后台的某个方法上打断点，换个方向追踪下去。这里遇到了挺多坑，花了挺长时间，最后追踪到的函数调用大致如下：<br> <code>[UMWorkDisPatch workWithEvent:] + 100</code><br> <code>[MobClickInternal workEvent:] + 668</code><br> <code>[MobClickInternal beginPerformJob] + 240</code><br> <code>[MobClickInternal generateEnvelopFile] + 56</code><br> <code>[MobClickEnvelope makeEnvelopeData] + 44</code><br> <code>[MobClickEnvelope entityData]</code><br> <code>[UMPayloadBuild payloadData]</code></p>
+<p>期间我一直在 lldb 里打印得到的 data 信息及其来源，当追踪到<br> <code>[UMPayloadBuild payloadData]</code><br>的末尾时，发现它对某 CFString 进行了 encoding 后得到 data，然后返回了此 data。 经动态调试，发现 encoding 的第二个参数是4，即 NSUTF8StringEncoding. 而这里方法的调用者基本就是数据源了，    </p>
+<p><img src="/assets/umimg5.png" alt="img5"></p>
+<p>大致看了一下这个 String ，或者说这个 Dictionary 的内容，大部分信息都是明文，需要的话可以直接调用 sdk 内部的接口来得到数据，只有两个地方是加密过的，一串是 id_tracking , 一串是 imprint 。 那接下来我就分析一下这两串数据是如何得到的。</p>
+</blockquote>
+<h2 id="第五步、id-tracking"><a href="#第五步、id-tracking" class="headerlink" title="第五步、id_tracking"></a>第五步、id_tracking</h2><blockquote>
+<p>进入 hopper ，直接在搜索栏里输入 idtracking ，发现三个与 payload 相关的函数：<br><code>[UMPayloadBuild buildIdTracking]</code><br><code>[UMPayloadBuild generateIdTracking]</code><br><code>[UMPayloadBuild saveIdTracking]</code><br>以及一个 class-dump 没有读取出来的类 ： UMTIdTracking<br>从后往前推的话可以发现，是在<br><code>[UMPayloadBuild buildHeaderSeg]</code><br>方法中，由<br><code>[UMHelper encodeBase64:[MobClickConfig configureWithKey:@&quot;umIDTracking&quot;]]</code><br>得到的最终字符串，那 id_tracking 本身又是怎样得到的呢？<br>先到第一个方法中去看实现 ， 先尝试<br><code>[MobClickConfig configureWithKey:@&quot;umIDTracking&quot;]</code><br>获取一个 data ，不空的情况下使用如下顺序对其封装：<br><code>r0 = UMTMemoryBuffer</code><br><code>r21 = [ro initWithData: r23(即刚才得到的data)]</code><br><code>r21 = [[UMTBinaryProtocol alloc] initWithTransport: r21]</code><br><code>r0 = [[UMIDTracking alloc] init]</code><br><code>[ro read: r21]</code>    </p>
+<p>看得出接下来是对 id_tracking 的一些属性进行了设置，我在程序将它写入 configure 之前对它进行了输出，看到其内部结构是这样的： </p>
+<p><img src="/assets/umimg6.png" alt="img6"></p>
+<p>包含了三个部分，其中 snapshots 里有四条， idfa 是 identifierForAdvertising ，即广告标示符； idfv 是 identiferForVender， 用于分析用户在应用内的行为， mc 是 mac 地址吧，但是这里获取到的值好像并不正确？ 最后一个 oid 我觉得可能是 open UDID？ 里面的 ts 都是时间戳，应该代表了获取它的时间。 第二部分是 journals，一直没看到对其赋值，可能是用于对用户其他行为的标示，我这里只是简单得开启应用，所以没有涉及到。 第三部分是 checksum，这里只是简单得将一个 “checksum” 填进去了，没有实质性得生成 checksum，可能是开发者觉得这里没必要验证，而将真正的验证过程放在了 imprint 中。</p>
+</blockquote>
+<h2 id="第六步、Imprint"><a href="#第六步、Imprint" class="headerlink" title="第六步、Imprint"></a>第六步、Imprint</h2><blockquote>
+<p>和 id_tracking 一样，先反着看它的写入过程：<br><code>x26 = [MobClickConfig configureWithKey: @&quot;umImprint&quot;]</code><br><code>buffer = [[UMTMemoryBuffer alloc] initWithData: x26]</code><br><code>binary = [[UMTBinaryProtocol alloc] initWithTransport: buffer]</code><br><code>imprint = [[[UMTImprint alloc] init] read: binary]</code><br><code>[UMPayloadBuild validateImprintCheckSum: imprint]</code><br><code>[UMHelper encodeBase64: ...]</code><br>这里相比 id_tracking 多了对 checksum 的设置，看来这部分包含的内容服务器比较看重，所以会注意防范对它的修改。<br>我采取了第五步类似的操作得到了它的明文信息：<br><img src="/assets/umimg7.png" alt="img7"><br>值得一提的是这里的每条属性都是用一个 ImprintValue 进行封装的，其中 value 和 ts 都不需要解释了， guid 的生成方式我追踪了一下，是由某原始 data 进行 md5 之后再调用 buildGUIDWithData: 生成，内容似乎是由几部分拼接而成，各个条目的拼接方式不同，比如前几项就是由 appId 的 md5data 和自身 value 的 md5data 拼接而成。这里我没有看的太仔细，不过大致能理解作者的用意，这里采用二重加密来防止别人对数据进行更改。顺带一提，这里的 checksum 也是采用 md5 方式生成。</p>
+</blockquote>
+<h2 id="第七步、额外的处理过程"><a href="#第七步、额外的处理过程" class="headerlink" title="第七步、额外的处理过程"></a>第七步、额外的处理过程</h2><blockquote>
+<p>之前的几步得到的只是源数据的产生过程，即一个 payloadData ，但是它并不是最后真正写到 log 文件里的 data， 这中间还有一些额外的处理过程。我们可以通过追踪函数调用来观察。<br>较为基础的调用栈是这样：<br><img src="/assets/umimg8.png" alt="img8"><br>payloadData 返回前调用 [NSData dataUsingEncoding: NSUTF8StringEncoding]<br>然后在 [MobClickEnvelope entityData] 中，获取 payloadData 后，调用<br>[UMANUtil deflatedData: ]，发现它实际调用了 [UMANDeflated deflatedDataPrefixedWith:0 level:0 source:data]; 然后再调用 [NSData dataWithBytesNoCopy:length:freeWhenDone:] ，这个方法我点进 NSData 查看后发现并没有注释，也就没有继续去了解，从字面上看这一串调用是对 data 进行了压缩。下面还有一个方法，是当数据被压缩后才会被调用的，内容大致是为它打上一个被压缩过的 label 以及时间戳。在我自己测试的过程中这两个方法并没有被调用。<br>之后再往上一层，回到 [MobClickEnvelope makeEnvelopeData] 中，发现它获取到 entityData 后，还会进行一个 [MobClickEnvelope toEnvelopeWithEntity:] 调用。那就点到方法里看一下它的实现：先 buildGUIDWithData ，然后根据配置策略考虑要不要进行 AES 加密，之后再设置 SerialNum, Entity, Length, Ts_secs , guid, signature, checksum 等值，期间进行过一次 bytesToHexString ,最后生成transport 并写入 buffer 。<br>到这儿为止 data 的设置就完成了，然后就是用时间戳生成文件名并写入文件了。    </p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><blockquote>
+<p>可以说是一直在追踪数据包的生成过程，采用了逆推的思维方式，先想办法得到数据包的结构，再一条条找数据的来源。这篇笔记着重分析了两条明显被处理过的条目，其他的条目可以说都是明文吧，我觉得都是可以通过调用相关接口较轻松得得到，就没有写出其获取方式。如果硬要说有些不能一眼看出来源的数据的话，大概 session id 属性算一个，不过在对整个数据包的追踪过程中的某一步里我看到了对它的设置，就顺手记录下来了，是 [MobClickInternal sessionId]<br>还有一点就是对于客户端安全性的思考，我之前和后台的同学交流过消息传输过程中如何保障其安全，了解到浏览器上可以使用 ssl ，通过端到端的加密，在消息发送时用公钥进行加密，这样即使存在中间人，也无法对消息进行修改，因为他没有私钥。但是客户端的消息就没办法防范中间人了，因为类似于这样对应用本身的逆向是可以做到在消息被加密前就对其作出改动的。所以要提高客户端消息的安全性，重点还是要加强对与代码的保护。</p>
+</blockquote>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><blockquote>
+<p>做逆向实在是一个考验耐心的活，要读懂一个函数的逻辑，不仅要翻译汇编代码读懂函数本身，还需要结合动态调试来观察运行时函数的参数具体是什么以及函数的调用栈如何，除此之外还要通过各种猜测来找到一些可疑函数。对这个 sdk 的逆向花费了我一个多星期的时间，虽然没涉及到什么特别深的东西，但还是觉得收获挺大。期间也走了不少弯路，比如当时不太明白程序进入后台之后的函数调用流程，就对一个叫 [MobClickInternal beginPerformJob] 的函数做了很多观察，但是发现并没有太多用处。最后附上一张这几天对汇编代码做翻译的手稿吧～<br><img src="/assets/umimg9.jpg" alt="img9"></p>
+</blockquote>
 
       
     </div>
@@ -313,7 +378,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a>
+    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/流水账/" style="font-size: 10px;">流水账</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a>
     			</div>
     	</section>
     
