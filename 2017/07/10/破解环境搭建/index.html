@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://yoursite.com">
+  <title>绕过购买直接下载 iReader 书籍 | Sxb的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="这是一次针对 iReader 的逆向，本来是打算从两个方面入手的：会员和下载，然而对会员功能的破解好像卡住了，所以本文只能写一下如何破解下载功能了。未经本人允许禁止任何形式转载，有问题请联系1398707587@qq.com">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绕过购买直接下载 iReader 书籍">
+<meta property="og:url" content="http://yoursite.com/2017/07/10/破解环境搭建/index.html">
+<meta property="og:site_name" content="Sxb的博客">
+<meta property="og:description" content="这是一次针对 iReader 的逆向，本来是打算从两个方面入手的：会员和下载，然而对会员功能的破解好像卡住了，所以本文只能写一下如何破解下载功能了。未经本人允许禁止任何形式转载，有问题请联系1398707587@qq.com">
+<meta property="og:image" content="http://yoursite.com/assets/zyImg1.png">
+<meta property="og:image" content="http://yoursite.com/assets/zyImg2.jpg">
+<meta property="og:image" content="http://yoursite.com/assets/zyImg3.png">
+<meta property="og:image" content="http://yoursite.com/assets/zyImg4.png">
+<meta property="og:image" content="http://yoursite.com/assets/zyImg5.jpg">
+<meta property="og:updated_time" content="2017-07-10T09:39:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="绕过购买直接下载 iReader 书籍">
+<meta name="twitter:description" content="这是一次针对 iReader 的逆向，本来是打算从两个方面入手的：会员和下载，然而对会员功能的破解好像卡住了，所以本文只能写一下如何破解下载功能了。未经本人允许禁止任何形式转载，有问题请联系1398707587@qq.com">
+<meta name="twitter:image" content="http://yoursite.com/assets/zyImg1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Sxb的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/assets/avatar.jpeg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Sxb</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">会点正向，会点逆向～</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/shixingbang/" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/p/1005055507014422" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/shi-xing-bang-48-16" title="zhihu">zhihu</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Sxb</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/assets/avatar.jpeg" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Sxb</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">会点正向，会点逆向～</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/shixingbang/" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/p/1005055507014422" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/shi-xing-bang-48-16" title="zhihu">zhihu</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-破解环境搭建" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      绕过购买直接下载 iReader 书籍
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>这是一次针对 iReader 的逆向，本来是打算从两个方面入手的：会员和下载，然而对会员功能的破解好像卡住了，所以本文只能写一下如何破解下载功能了。<br><strong>未经本人允许禁止任何形式转载，有问题请联系1398707587@qq.com</strong></p>
+<a id="more"></a>
+<h2 id="破解环境搭建"><a href="#破解环境搭建" class="headerlink" title="破解环境搭建"></a>破解环境搭建</h2><blockquote>
+<p>无非就是 cycript， hopper， lldb， debugserver， reveal， class-dump， dumpdecrypt 的配合使用咯，没有太多好讲的。值得一提的是这次 class-dump 没有运行成功，因为 iReader 是 oc 和 swift 混编的，原版的 class-dump 不仅对 swift 不支持（因为 swift 并没有那么多的运行时特性），而且在应用混杂了 swift 之后，连原有的 oc 头文件也不能输出了，所以这次破解没有使用 class-dump，打算接下来一段时间读一下 class-dump 源码然后自己重新编译一下。 还有就是发现 usb 连接手机来调试非常稳定，比 wifi 要可靠多了。</p>
+</blockquote>
+<h2 id="外部环境观察"><a href="#外部环境观察" class="headerlink" title="外部环境观察"></a>外部环境观察</h2><blockquote>
+<p>使用 cycript，输出 recursiveDescription，然后随便挑一个控件连续输出 nextResponder，很快就得到了图书下载界面的描述：ZYWebViewController 。<br>因为这次没有了 class-dump 的帮助，所以只能直接到 hopper 里找线索了：<br><img src="/assets/zyImg1.png" alt="img1">    </p>
+<p>然而这个页面的实际样式是这样：    </p>
+<p><img src="/assets/zyImg2.jpg" alt="img2"></p>
+<p>如果这是一个 tableViewController 的话，至少 hopper 里会打出 delegate 和 datasource 的相关方法吧，然而并没有，所以猜测 iReader 可能是用了 React Naitve 写的。不过也不影响，事件的响应函数一定会写在本地。因为之前没有自己写过 RN，不太了解这种应用应该怎样架构，想到的第一个问题是这个 controller 里没有原生的 didSelect， buttonTapped 等方法，页面是怎么识别用户点击了下载按钮的。于是去搜了一下 UIWebView 的一些具体用法，了解到可以使用 WKNavigationDelegate 来处理和 js 的交互，顺着这个线索找下去，果然在 ZYWebView 类里找到了相关的<br><code>[ZYWebView executiveBookStoreAction:newReques:navigationType:]</code><br><code>[ZYWebView webView:shouldStartLoadWithRequest:navigationType:]</code><br>再顺着找下去，在 ZYWebCenter 类中发现了具体执行的函数：<br><code>[ZYWebCenter webView:actionDownload:]</code><br>这便是切入口了。</p>
+</blockquote>
+<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><blockquote>
+<p>这里我是一边读汇编代码，一边 lldb+debugserver 实时观察寄存器内容的。刚进入这个方法时，先生成本次的 downloadInfo:    </p>
+</blockquote>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">	&#123;</div><div class="line">	DownloadUrl = “&amp;pk=ch_feature&amp;pos=NewUser_11498149”;</div><div class="line">	Ebk3DownloadUrl = “&amp;pk=ch_feature&amp;pos=NewUser_11498149”;</div><div class="line">	FileId = 11498149;</div><div class="line">	FileName = “…\U300b.epub”;</div><div class="line">	FileSize = 10000000;</div><div class="line">	Type = 1;</div><div class="line">	Version = 2;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>然后会去 ZYBookTransactionCenter 中查询未完成购买的书和章节<br>再然后生成本次的 TransactionInfo：    //这是一本需要购买才能下载的书    </p>
+</blockquote>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"> &#123;</div><div class="line">    AuthorName = &quot;\U6d1b\U57ce\U4e1c&quot;;</div><div class="line">    CategoryName = &quot;&quot;;</div><div class="line">    DownloadInfo =     &#123;</div><div class="line">        DownloadUrl = &quot;&amp;pk=ch_feature&amp;pos=frequency&quot;;</div><div class="line">        Ebk3DownloadUrl = &quot;&amp;pk=ch_feature&amp;pos=frequency&quot;;</div><div class="line">        FileId = 11302933;</div><div class="line">        FileName = &quot;\U300a\U7edd\U4e16\U6b66\U9b42\U300b.epub&quot;;</div><div class="line">        FileSize = 10000000;</div><div class="line">        Type = 2;</div><div class="line">        Version = 2;</div><div class="line">    &#125;;</div><div class="line">    DownloadType = 2;</div><div class="line">    FileId = 11302933;</div><div class="line">    FileName = &quot;\U300a\U7edd\U4e16\U6b66\U9b42\U300b.epub&quot;;</div><div class="line">    OrderUrl = &quot;http://ih2.ireader.com/zybook4/iphone/u/p/order.php?bid=11302933&amp;feeUnit=20&amp;price=2&amp;cp=6815172&amp;cid=6815172&amp;Act=getOrderTmpInfo&amp;&amp;t=down&amp;pk=ch_feature&amp;pos=frequency&quot;;</div><div class="line">    Price = 2;</div><div class="line">    Url = &quot;http://ih2.ireader.com/zytc/public/index.php?ca=Order.CreateBatch&amp;bid=11302933&amp;cid=1&amp;pk=17B11302933&amp;pca=Channel.Index&amp;projectSource=zybook4&amp;pos=frequency&amp;pk=ch_feature&amp;pos=frequency&quot;;</div><div class="line">    bookCatalog =     &#123;</div><div class="line">        bookId = 11302933;</div><div class="line">        bookType = 1;</div><div class="line">        data =         &#123;</div><div class="line">            genreDate = &quot;&quot;;</div><div class="line">            genreId = 0;</div><div class="line">            genreName = &quot;&quot;;</div><div class="line">            orderId = 0;</div><div class="line">        &#125;;</div><div class="line">        downloadType = 1;</div><div class="line">        isEpubSerialize = 1;</div><div class="line">        relResource =         (</div><div class="line">                        &#123;</div><div class="line">                &quot;book_id&quot; = 10951103;</div><div class="line">                isEpubSerialize = 0;</div><div class="line">                status = 10;</div><div class="line">                type = 0;</div><div class="line">            &#125;</div><div class="line">        );</div><div class="line">        type = 0;</div><div class="line">    &#125;;</div><div class="line">    cp = 6815172;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>这里会把订单信息的 purchaseType 和 5 比较一下，如果不想等则把 statusType 设置为 7<br>接着调用  <code>[ZYWevCenter dealBookStoreDirectTransaction:..]</code><br>进了这个方法之后，还是要再确认一下 purchaseType，5 的话调用 processDirectDownload, 不是 5 的话分情况调用下图的几个方法：   </p>
+<p><img src="/assets/zyImg3.png" alt="img3"></p>
+<p>到这儿我就只分析一下 processDirectDownload 方法的内容：<br><code>[[DataBaseManager sharedManager] getBookWithNetBookId: ..]</code><br>检查数据库中是否已存在此书，若不存在，<br><code>[ZYWebCenter direcDownload]</code><br>这个方法基本只做了一件事，就是调用这个方法：<br><code>[[ZYBookTransaction shareInstance] download: completion: ]</code></p>
+<p>进了这个方法之后，流程又开始变得复杂起来，开始根据之前传进来的 TransactionInfo 的各个 type 值走不同分支。有 4 个判断点：    </p>
+<ol>
+<li>purchaseType == 4    </li>
+<li>statusType == 6    </li>
+<li>downloadType &lt;? 10    </li>
+<li>completion == nil<br>为了确定一个正常的下载应该会走哪个分支，我下了一本免费书，追踪了一下它的各个 type 值，其中 purchaseType = 5, statusType = 7, feeType = 2, downloadType = 10, sourceType = 1, failedType = nil.<br>一本需要购买才能下载的书的 type 则是这样： purchaseType = 2, statusType = 2, feeType = 2, downloadType = 6, sourceType = 1, failedType = nil.    </li>
+</ol>
+<p>于是就筛出了一次正常购买应走的流程：<br><code>[BookDownloadManager getBookWithNetBookId: ]</code><br><code>[ZYBookTransactionCenter fixBook: withTraceInfo: ]</code><br><code>downloadURL</code><br><code>isTipWhenAddDb</code><br><code>mainQueueRequestStart:book:addMsg:needRefreshBookShelf:needUserId</code><br><code>setStatusType: 8</code><br><code>upGradeProcessPercent:</code><br><code>finishTransaction:</code>    </p>
+<p>在分析的过程中，已经使用 register write 改变了这几个关键 type 的值，试了一下已经可以绕过购买直接下载了，也就没有再继续往下分析 mainQueue 那个方法的内容，估计是更低层的下载函数吧。</p>
+</blockquote>
+<h2 id="Tweak"><a href="#Tweak" class="headerlink" title="Tweak"></a>Tweak</h2><blockquote>
+<p>最后再写个 tweak ：<br><img src="/assets/zyImg4.png" alt="img4"><br>装到手机，一次就成功了。</p>
+</blockquote>
+<h2 id="对于-iReader-中-WebView-使用的一些思考"><a href="#对于-iReader-中-WebView-使用的一些思考" class="headerlink" title="对于 iReader 中 WebView 使用的一些思考"></a>对于 iReader 中 WebView 使用的一些思考</h2><blockquote>
+<p>刚开始学 iOS 开发不久 RN 就出来了，然而直到今年三月苹果把许多用了 RN 的应用都下架了我都没好好研究一下 RN 的用法以及特性，这次看到了 iReader 中的 WebView 的使用，最先想到的问题是，把所有的界面都用 WebView 来使用，然后把所有用户交互的响应都丢给 WebCenter 来处理，不会使 WebCenter 这个类非常臃肿吗？ 单例模式固然好，但我觉得应该用在一些独立的小模块如登录注册，用户管理上，而不是由一个类来处理所有交互信息。还有一点就是响应速度的问题，如果是一个原生 UIButton 来处理下载的话，用户点击之后可以即时响应，而如果用 JS 交互的话就多了一层解析，还要由 delegate 来分发，显然会拖慢速度。还有一点就是安全性问题，黑客能否利用js执行恶意脚本尚不得而知，但是开发者无疑是有机会在应用里留后门的。</p>
+</blockquote>
+<h2 id="纪念图"><a href="#纪念图" class="headerlink" title="纪念图"></a>纪念图</h2><blockquote>
+<p>留念一下这两天翻译汇编代码以及记录运行流程留下的笔记吧～<br><img src="/assets/zyImg5.jpg" alt="img5"></p>
+</blockquote>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/10/破解环境搭建/" class="archive-article-date">
+  	<time datetime="2017-07-10T09:39:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/逆向/">逆向</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/06/14/记一次 pod 的重装经历/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">记一次 pod 重装经历</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="破解环境搭建" data-title="绕过购买直接下载 iReader 书籍" data-url="http://yoursite.com/2017/07/10/破解环境搭建/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"shixingbang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Sxb
+    	</div>
+      	<div class="footer-right">
+
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/写于夜里/" style="font-size: 10px;">写于夜里</a> <a href="/tags/反调试/" style="font-size: 10px;">反调试</a> <a href="/tags/流水账/" style="font-size: 10px;">流水账</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.imjianing.wang/">嘉宁大神</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">很惭愧&lt;br&gt;&lt;br&gt;只做了一点微小的工作&lt;br&gt;谢谢大家</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
